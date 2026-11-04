@@ -24,11 +24,15 @@
 
 **Flashback Text** adds a **Text** element to the timeline of [Flashback](https://modrinth.com/mod/flashback). You can place text in the world of your replay for titles, labels, captions and signs, etc. The text is part of the 3D world/scene, so it appears in the editor preview and in your exported videos.
 
+<p align="center">
+  <a href="https://youtu.be/U6CSbXhqego"><img src="images/video.jpg" alt="Watch Flashback Text - Minecraft Addon on YouTube" width="85%"></a>
+  <br>
+  <b><a href="https://youtu.be/U6CSbXhqego">▶ Watch the showcase on YouTube</a></b>
+</p>
+
 ![Text showcase - Front Angle](https://cdn.modrinth.com/data/cached_images/8facb847c26cd3748b584ec4f872f20b2c7648f4.png)
 
 ![Text showcase - Side Angle](https://cdn.modrinth.com/data/cached_images/83780a78bdf148fa6c32710c007cb3ae3f0f4f87.png)
-
-![Text showcase - Fullscreen](https://cdn.modrinth.com/data/cached_images/8f765d6d5a0088d8d19ccd3a4605cf526317e5f4_0.webp)
 
 ## How it works
 
