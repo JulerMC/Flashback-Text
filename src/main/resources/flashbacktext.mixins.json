@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.flashbacktext.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"KeyframeJsonMixin",
+		"KeyframeTypeIdMixin",
+		"TimelineCreateKeyframeMixin",
+		"TextIconMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"plugin": "com.flashbacktext.mixin.FlashbackTextMixinPlugin"
+}

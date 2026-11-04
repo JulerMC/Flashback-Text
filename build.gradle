@@ -1,0 +1,62 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+
+// Compile against the released Flashback jar (it includes Flashback's ImGui build).
+// It is downloaded for compiling only and never bundled: Flashback is "all rights reserved".
+// Flashback is built with a newer Loom than this project, so a copy without that marker is used.
+def flashbackUrl = "https://cdn.modrinth.com/data/4das1Fjq/versions/nPzvTtsX/Flashback-0.39.10-for-MC1.21.1.jar"
+def depsDir = file("${rootDir}/.gradle/flashback-deps")
+def flashbackJar = new File(depsDir, "Flashback-0.39.10-for-MC1.21.1-compile.jar")
+if (!flashbackJar.exists()) {
+	depsDir.mkdirs()
+	def download = new File(depsDir, "Flashback-0.39.10-for-MC1.21.1.jar")
+	if (!download.exists()) {
+		new URL(flashbackUrl).withInputStream { input -> download.withOutputStream { it << input } }
+	}
+	def tmp = new File(depsDir, "flashback.tmp")
+	new java.util.zip.ZipInputStream(new FileInputStream(download)).withCloseable { zin ->
+		new java.util.zip.ZipOutputStream(new FileOutputStream(tmp)).withCloseable { zout ->
+			def entry
+			while ((entry = zin.nextEntry) != null) {
+				// Only classes and the mod metadata are needed to compile against
+				if (entry.isDirectory() || !(entry.name.endsWith(".class") || entry.name == "fabric.mod.json" || entry.name == "META-INF/MANIFEST.MF" || entry.name.endsWith(".mixins.json") || entry.name.endsWith(".accesswidener") || entry.name.endsWith(".classtweaker"))) {
+					continue
+				}
+				zout.putNextEntry(new java.util.zip.ZipEntry(entry.name))
+				if (entry.name == "META-INF/MANIFEST.MF") {
+					def text = new String(zin.readAllBytes(), "UTF-8").readLines().findAll { !it.startsWith("Fabric-Loom-Version") }.join("\n") + "\n"
+					zout.write(text.getBytes("UTF-8"))
+				} else {
+					zin.transferTo(zout)
+				}
+				zout.closeEntry()
+			}
+		}
+	}
+	tmp.renameTo(flashbackJar)
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modCompileOnly files(flashbackJar)
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}

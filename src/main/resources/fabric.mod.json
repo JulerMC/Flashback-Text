@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "flashbacktext",
+	"version": "${version}",
+	"name": "Flashback Text",
+	"description": "Adds a Text element to Flashback's timeline: text placed in the world of your replay, animated with keyframes, shown in the editor and in exported videos.",
+	"authors": [
+		"Ceohh"
+	],
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.flashbacktext.FlashbackText"
+		]
+	},
+	"mixins": [
+		"flashbacktext.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"flashback": "*",
+		"fabric-api": "*"
+	}
+}
