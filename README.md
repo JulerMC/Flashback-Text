@@ -39,14 +39,6 @@
 
 Text tracks work just like Flashback's own elements. Drag them with the handle to reorder, use the track menu to rename, recolour, delete or clear, toggle visibility with the eye, and undo changes. Everything is saved with the replay.
 
-## Screenshots
-
-| Add it from **Add Element** | A Text track on the timeline |
-|---|---|
-| ![The Add Element menu with Text listed](images/gui-1-add-element.png) | ![A Text track with two keyframes and its text in the world](images/gui-2-timeline-track.png) |
-| **Right-click a keyframe** to edit it | The **track menu** |
-| ![The keyframe options: text, position, rotation, size, colour, typewriter and more](images/gui-3-keyframe-options.png) | ![The track menu: Rename, Set Colour, Delete track, Clear Keyframes](images/gui-4-track-menu.png) |
-
 ## Features
 
 - **Text in the world** at fixed coordinates and rotation (X Y Z, yaw, pitch, roll), like a real sign
