@@ -74,6 +74,18 @@ Grab [`flashback-text-1.3.2.jar`](download/flashback-text-1.3.2.jar) and put it 
 - This is an **unofficial add-on**. It isn't made or endorsed by Flashback's author, and it contains no Flashback code.
 - **I also made this fully with AI and want to be transparent about that, it was originally meant for just me to use in a video, but I thought it was a good addon and had value so I wanted to publish it for anyone to use.**
 
+## Updates
+
+- **1.3.2**: Fixed the background box hiding the text when a shader pack is on (tested with Solas).
+- **1.3.1**: Fixed the camera and Text jerking when they reach a keyframe (**Smooth keyframe joins**, in Visuals → Other). Added favourite fonts: click the ☆ to keep a font at the top of the list.
+- **1.3.0**: Fixed Text wobbling against the camera during camera moves. Added system fonts and the **Guide** drop-down (Rule of Thirds, Golden Spiral, Golden Section, Golden Triangles, Harmonious Triangles, Spiral Section).
+- **1.2.3**: Fixed **Start Export** not starting, and replay edits being lost after a restart, when a replay had Text.
+- **1.2.2**: Different text on the next keyframe is now untyped, then the new text typed in.
+- **1.2.1**: The typewriter now types at an even speed between keyframes.
+- **1.2.0**: Text became a real timeline element (**Add Element → Text**) with keyframes, fixed world position and rotation.
+- **1.1.0**: Text moved into the 3D world instead of sitting on the screen.
+- **1.0.0**: First release.
+
 ## Support
 
 - **Discord:** questions, bug reports and ideas → [discord.gg/BXv7Mx4vny](https://discord.gg/BXv7Mx4vny)
