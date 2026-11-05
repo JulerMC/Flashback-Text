@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/header.webp" alt="Flashback Text: &quot;This mod adds text!&quot; floating over a village at sunset" width="100%">
+  <img src="https://cdn.modrinth.com/data/cached_images/17d02cbe7b61647a1c2c7863479793039c809b63_0.webp" alt="Flashback Text: &quot;This mod adds text!&quot; floating over a village at sunset" width="100%">
 </p>
 
 <h1 align="center">Flashback Text</h1>
