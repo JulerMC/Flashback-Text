@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://discord.gg/BXv7Mx4vny"><img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the Discord"></a>
   <a href="https://buymeacoffee.com/juler"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
-  <a href="download/flashback-text-1.3.1.jar"><img src="https://img.shields.io/badge/Download-1.3.1-2ea44f?style=for-the-badge" alt="Download 1.3.1"></a>
+  <a href="download/flashback-text-1.3.2.jar"><img src="https://img.shields.io/badge/Download-1.3.2-2ea44f?style=for-the-badge" alt="Download 1.3.2"></a>
 </p>
 
 <p align="center">
@@ -65,7 +65,7 @@ Text tracks work just like Flashback's own elements. Drag them with the handle t
 
 ## Download
 
-Grab [`flashback-text-1.3.1.jar`](download/flashback-text-1.3.1.jar) and put it in your `mods` folder next to Flashback.
+Grab [`flashback-text-1.3.2.jar`](download/flashback-text-1.3.2.jar) and put it in your `mods` folder next to Flashback.
 
 ## Good to know
 

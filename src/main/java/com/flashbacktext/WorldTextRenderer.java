@@ -12,6 +12,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.util.math.BlockPos;
@@ -164,17 +166,45 @@ public final class WorldTextRenderer {
 		for (String line : lines) {
 			widest = Math.max(widest, font.getWidth(line));
 		}
+		Matrix4f textMatrix = matrix;
+		if (boxColor != 0) {
+			// The box is its own flat panel and the letters sit a little in front of it.
+			// (Drawing both in one pass on the same plane, as Minecraft does, lets shader
+			// packs draw the box over the letters.)
+			RenderLayer boxLayer = item.throughBlocks ? RenderLayer.getTextBackgroundSeeThrough() : RenderLayer.getTextBackground();
+			VertexConsumer box = consumers.getBuffer(boxLayer);
+			for (int i = 0; i < lines.length; i++) {
+				int width = font.getWidth(lines[i]);
+				float x = lineX(item.align, widest, width);
+				float y = -blockHeight / 2f + i * font.fontHeight;
+				quad(box, matrix, x - 1, y - 1, x + width, y + font.fontHeight, boxColor, light);
+			}
+			float scale = Math.max(0.001f, item.size) / font.fontHeight;
+			float lift = 0.06f + 0.004f / scale;   // ~4 mm in front of the box, in text units
+			textMatrix = new Matrix4f(matrix).translate(0, 0, lift);   // +z faces the viewer in text space
+		}
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
 			int width = font.getWidth(line);
-			float x = switch (item.align) {
-				case TextKeyframe.ALIGN_LEFT -> -widest / 2f;
-				case TextKeyframe.ALIGN_RIGHT -> widest / 2f - width;
-				default -> -width / 2f;
-			};
+			float x = lineX(item.align, widest, width);
 			float y = -blockHeight / 2f + i * font.fontHeight;
-			font.draw(line, x, y, textColor, item.shadow, matrix, consumers, layer, boxColor, light);
+			font.draw(line, x, y, textColor, item.shadow, textMatrix, consumers, layer, 0, light);
 		}
+	}
+
+	private static float lineX(int align, int widest, int width) {
+		return switch (align) {
+			case TextKeyframe.ALIGN_LEFT -> -widest / 2f;
+			case TextKeyframe.ALIGN_RIGHT -> widest / 2f - width;
+			default -> -width / 2f;
+		};
+	}
+
+	private static void quad(VertexConsumer vc, Matrix4f m, float x0, float y0, float x1, float y1, int argb, int light) {
+		vc.vertex(m, x0, y0, 0).color(argb).light(light);
+		vc.vertex(m, x0, y1, 0).color(argb).light(light);
+		vc.vertex(m, x1, y1, 0).color(argb).light(light);
+		vc.vertex(m, x1, y0, 0).color(argb).light(light);
 	}
 
 	private static int argb(float[] rgba, float alpha) {
