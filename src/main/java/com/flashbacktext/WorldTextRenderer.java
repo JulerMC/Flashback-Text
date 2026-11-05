@@ -1,14 +1,13 @@
 package com.flashbacktext;
 
-import com.moulberry.flashback.Flashback;
 import com.moulberry.flashback.keyframe.Keyframe;
 import com.moulberry.flashback.keyframe.change.KeyframeChange;
 import com.moulberry.flashback.keyframe.interpolation.SidedInterpolationType;
-import com.moulberry.flashback.playback.ReplayServer;
 import com.moulberry.flashback.state.EditorScene;
 import com.moulberry.flashback.state.EditorState;
 import com.moulberry.flashback.state.EditorStateManager;
 import com.moulberry.flashback.state.KeyframeTrack;
+import com.moulberry.flashback.state.RealTimeMapping;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -74,24 +73,19 @@ public final class WorldTextRenderer {
 		if (state == null) {
 			return showing;
 		}
-		double tick;
-		if (Flashback.isExporting()) {
-			tick = Flashback.EXPORT_JOB.getSettings().startTick() + Flashback.EXPORT_JOB.getCurrentTickDouble();
-		} else {
-			ReplayServer server = Flashback.getReplayServer();
-			if (server == null) {
-				return showing;
-			}
-			tick = server.getPartialReplayTick();
+		double tick = FrameTime.tick(state);
+		if (Double.isNaN(tick)) {
+			return showing;
 		}
+		RealTimeMapping realTime = FrameTime.realTime(state);
 		long stamp = state.acquireRead();
 		try {
 			EditorScene scene = state.getCurrentScene(stamp);
 			for (KeyframeTrack track : scene.keyframeTracks) {
 				if (track.enabled && track.keyframeType == TextKeyframeType.INSTANCE && !track.keyframesByTick.isEmpty()) {
-					KeyframeChange change = track.createKeyframeChange((float) tick, null);
+					KeyframeChange change = track.createKeyframeChange((float) tick, realTime);
 					if (change instanceof TextChange text) {
-						applyTypewriter(track, tick, text);
+						applyTypewriter(track, tick, realTime, text);
 						showing.add(text);
 					}
 				}
@@ -103,7 +97,7 @@ public final class WorldTextRenderer {
 	}
 
 	/** Words and letter count come from the keyframes directly, so typing runs at an even speed. */
-	private static void applyTypewriter(KeyframeTrack track, double tick, TextChange text) {
+	private static void applyTypewriter(KeyframeTrack track, double tick, RealTimeMapping realTime, TextChange text) {
 		Map.Entry<Integer, Keyframe> left = track.keyframesByTick.floorEntry((int) tick);
 		if (left == null || !(left.getValue() instanceof TextKeyframe a)) {
 			return;
@@ -115,14 +109,21 @@ public final class WorldTextRenderer {
 			text.letters = Typewriter.lettersAt(a.text, a.reveal);
 			return;
 		}
-		double amount = (tick - left.getKey()) / (double) (right.getKey() - left.getKey());
+		double amount;
+		if (realTime != null) {
+			float from = realTime.getRealTime(left.getKey()), to = realTime.getRealTime(right.getKey());
+			amount = to > from ? (realTime.getRealTime((float) tick) - from) / (to - from) : 1.0;
+		} else {
+			amount = (tick - left.getKey()) / (double) (right.getKey() - left.getKey());
+		}
 		Typewriter.Shown shown = Typewriter.between(a.text, a.reveal, b.text, b.reveal, amount);
 		text.text = shown.text();
 		text.letters = shown.letters();
 	}
 
 	private static void draw(MinecraftClient client, Vec3d cam, VertexConsumerProvider consumers, TextChange item) {
-		TextRenderer font = client.textRenderer;
+		TextRenderer custom = SystemFonts.renderer(item.font, item.fontName);
+		TextRenderer font = custom != null ? custom : client.textRenderer;
 		float alpha = item.color[3];
 		if (alpha < 0.02f) {
 			return;   // Minecraft draws almost-transparent text as opaque, so skip it

@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://discord.gg/BXv7Mx4vny"><img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the Discord"></a>
   <a href="https://buymeacoffee.com/juler"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
-  <a href="download/flashback-text-1.2.3.jar"><img src="https://img.shields.io/badge/Download-1.2.3-2ea44f?style=for-the-badge" alt="Download 1.2.3"></a>
+  <a href="download/flashback-text-1.3.0.jar"><img src="https://img.shields.io/badge/Download-1.3.0-2ea44f?style=for-the-badge" alt="Download 1.3.0"></a>
 </p>
 
 <p align="center">
@@ -52,6 +52,8 @@ Text tracks work just like Flashback's own elements. Drag them with the handle t
 - **Shadow**, **readable from behind**, **show through blocks** and **world lighting** options
 - **Keyframe animation**: position, rotation, size, colour and transparency blend between keyframes using Flashback's interpolation types (Smooth, Linear, Ease, Hold…). Fade text in and out by keyframing its transparency.
 - **Typewriter effect** that types at an even speed between keyframes. When the next keyframe has different text, the old text is untyped and the new text typed in.
+- **System fonts**: use any font installed on your computer (TrueType or OpenType), chosen per keyframe with a searchable list. Minecraft's font stays the default.
+- **Composition guides**: Visuals → Other has a **Guide** drop-down with Rule of Thirds, Golden Spiral, Golden Section, Golden Triangles, Harmonious Triangles and Spiral Section, with a **Flip** button for the ones that have a direction. Saved per replay, shown in the editor only (not in exports).
 
 ## Requirements
 
@@ -62,7 +64,7 @@ Text tracks work just like Flashback's own elements. Drag them with the handle t
 
 ## Download
 
-Grab [`flashback-text-1.2.3.jar`](download/flashback-text-1.2.3.jar) and put it in your `mods` folder next to Flashback.
+Grab [`flashback-text-1.3.0.jar`](download/flashback-text-1.3.0.jar) and put it in your `mods` folder next to Flashback.
 
 ## Good to know
 

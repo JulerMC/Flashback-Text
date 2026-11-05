@@ -22,6 +22,8 @@ public final class TextChange implements KeyframeChange {
 	public boolean worldLight;
 	public boolean bothSides;
 	public float reveal;
+	public String font = "";
+	public String fontName = "";
 	/** Letters to show, worked out by {@link Typewriter} from the keyframes (-1 = use reveal). */
 	public int letters = -1;
 
@@ -44,6 +46,8 @@ public final class TextChange implements KeyframeChange {
 		c.worldLight = k.worldLight;
 		c.bothSides = k.bothSides;
 		c.reveal = k.reveal;
+		c.font = k.font == null ? "" : k.font;
+		c.fontName = k.fontName == null ? "" : k.fontName;
 		return c;
 	}
 
@@ -79,6 +83,8 @@ public final class TextChange implements KeyframeChange {
 		c.throughBlocks = from.throughBlocks;
 		c.worldLight = from.worldLight;
 		c.bothSides = from.bothSides;
+		c.font = from.font;
+		c.fontName = from.fontName;
 		return c;
 	}
 

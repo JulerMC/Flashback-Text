@@ -60,10 +60,15 @@ public class TextKeyframe extends Keyframe {
 	public boolean bothSides = true;
 	/** Typewriter: share of the characters shown, 0..1. */
 	public float reveal = 1f;
+	/** System font ("path#face"), or empty for Minecraft's font. */
+	public String font = "";
+	/** The font's name, to find it again on another computer. */
+	public String fontName = "";
 
 	// Text box state for the edit popup
 	private static TextKeyframe editing;
 	private static ImString editBuffer;
+	private static final ImString fontSearch = new ImString(128);
 
 	@Override
 	public KeyframeType<?> keyframeType() {
@@ -91,6 +96,8 @@ public class TextKeyframe extends Keyframe {
 		c.worldLight = worldLight;
 		c.bothSides = bothSides;
 		c.reveal = reveal;
+		c.font = font;
+		c.fontName = fontName;
 		return c;
 	}
 
@@ -177,6 +184,7 @@ public class TextKeyframe extends Keyframe {
 			update.accept(k -> ((TextKeyframe) k).text = value);
 		}
 		ImGui.textDisabled("New lines work. &c red, &e yellow, &a green, &l bold, &o italic, &r reset");
+		fontPicker(update);
 
 		ImGui.separator();
 		ImGui.setNextItemWidth(260);
@@ -281,6 +289,47 @@ public class TextKeyframe extends Keyframe {
 		ImGui.separator();
 	}
 
+	private void fontPicker(Consumer<Consumer<Keyframe>> update) {
+		String current = this.font == null || this.font.isEmpty() ? "Minecraft (default)" : SystemFonts.nameOf(this.font, this.fontName);
+		ImGui.setNextItemWidth(260);
+		if (ImGui.beginCombo("Font##flashbacktextFont", current)) {
+			if (ImGui.isWindowAppearing()) {
+				fontSearch.set("");
+				ImGui.setKeyboardFocusHere();
+			}
+			ImGui.setNextItemWidth(250);
+			ImGui.inputTextWithHint("##flashbacktextFontSearch", "Search fonts", fontSearch);
+			String search = fontSearch.get().trim().toLowerCase(java.util.Locale.ROOT);
+			if (ImGui.selectable("Minecraft (default)", this.font == null || this.font.isEmpty())) {
+				update.accept(k -> {
+					((TextKeyframe) k).font = "";
+					((TextKeyframe) k).fontName = "";
+				});
+			}
+			java.util.List<SystemFonts.Entry> fonts = SystemFonts.list();
+			if (fonts.isEmpty()) {
+				ImGui.textDisabled(SystemFonts.searching() ? "Finding fonts on this computer..." : "No fonts found on this computer");
+			}
+			int shown = 0;
+			for (SystemFonts.Entry entry : fonts) {
+				if (!search.isEmpty() && !entry.name().toLowerCase(java.util.Locale.ROOT).contains(search)) {
+					continue;
+				}
+				if (++shown > 400) {
+					ImGui.textDisabled("Type to search for more...");
+					break;
+				}
+				if (ImGui.selectable(entry.name() + "##" + entry.key(), entry.key().equals(this.font))) {
+					update.accept(k -> {
+						((TextKeyframe) k).font = entry.key();
+						((TextKeyframe) k).fontName = entry.name();
+					});
+				}
+			}
+			ImGui.endCombo();
+		}
+	}
+
 	// ---- Saving (called from Flashback's keyframe JSON adapter) ----
 
 	public JsonObject toJson() {
@@ -303,6 +352,8 @@ public class TextKeyframe extends Keyframe {
 		o.addProperty("world_light", worldLight);
 		o.addProperty("both_sides", bothSides);
 		o.addProperty("reveal", reveal);
+		o.addProperty("font", font == null ? "" : font);
+		o.addProperty("font_name", fontName == null ? "" : fontName);
 		return o;
 	}
 
@@ -330,6 +381,9 @@ public class TextKeyframe extends Keyframe {
 		if (o.has("worldLight")) k.worldLight = o.get("worldLight").getAsBoolean();
 		if (o.has("bothSides")) k.bothSides = o.get("bothSides").getAsBoolean();
 		if (o.has("reveal")) k.reveal = o.get("reveal").getAsFloat();
+		if (o.has("font")) k.font = o.get("font").getAsString();
+		if (o.has("font_name")) k.fontName = o.get("font_name").getAsString();
+		if (o.has("fontName")) k.fontName = o.get("fontName").getAsString();
 		return k;
 	}
 

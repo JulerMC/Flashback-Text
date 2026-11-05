@@ -7,7 +7,12 @@
 		"KeyframeJsonMixin",
 		"KeyframeTypeIdMixin",
 		"TimelineCreateKeyframeMixin",
-		"TextIconMixin"
+		"TextIconMixin",
+		"EditorStateAccessor",
+		"EditorStateTimeMixin",
+		"ReplayVisualsMixin",
+		"VisualsWindowGuideMixin",
+		"ReplayUIGuideMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

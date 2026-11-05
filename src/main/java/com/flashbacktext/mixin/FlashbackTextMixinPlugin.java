@@ -19,6 +19,6 @@ public class FlashbackTextMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		FlashbackText.LOGGER.info("Flashback Text hooked into {}", targetClassName);
+		FlashbackText.LOGGER.info("Flashback Text hooked into {} ({})", targetClassName, mixinClassName.substring(mixinClassName.lastIndexOf('.') + 1));
 	}
 }
