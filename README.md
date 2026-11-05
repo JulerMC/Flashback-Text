@@ -25,9 +25,9 @@
 **Flashback Text** adds a **Text** element to the timeline of [Flashback](https://modrinth.com/mod/flashback). You can place text in the world for titles, labels, captions and cinematics. The text is part of the 3D world/scene, so it appears in the video preview and in your exported videos.
 
 <p align="center">
-  <a href="https://youtu.be/NDNXc_1OBIg"><img src="images/video.jpg" alt="Showcase Video" width="85%"></a>
+  <a href="https://youtu.be/xTHaJWdqU5Y"><img src="images/video.jpg" alt="Showcase Video" width="85%"></a>
   <br>
-  <b><a href="https://youtu.be/NDNXc_1OBIg">▶ Watch the showcase video</a></b>
+  <b><a href="https://youtu.be/xTHaJWdqU5Y">▶ Watch the showcase video</a></b>
 </p>
 
 ![3D Text + Day Counter + Shaders](https://cdn.modrinth.com/data/cached_images/17d02cbe7b61647a1c2c7863479793039c809b63_0.webp)
