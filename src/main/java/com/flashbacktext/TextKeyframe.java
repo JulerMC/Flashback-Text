@@ -138,16 +138,16 @@ public class TextKeyframe extends Keyframe {
 		c.yaw = CatmullRom.degrees(k0.yaw, k1.yaw, k2.yaw, k3.yaw, time1, time2, time3, amount);
 		c.pitch = CatmullRom.value(k0.pitch, k1.pitch, k2.pitch, k3.pitch, time1, time2, time3, amount);
 		c.roll = CatmullRom.degrees(k0.roll, k1.roll, k2.roll, k3.roll, time1, time2, time3, amount);
-		c.size = Math.max(0.01f, CatmullRom.value(k0.size, k1.size, k2.size, k3.size, time1, time2, time3, amount));
-		c.reveal = clamp01(CatmullRom.value(k0.reveal, k1.reveal, k2.reveal, k3.reveal, time1, time2, time3, amount));
-		c.number = CatmullRom.value((float) k0.number, (float) k1.number, (float) k2.number, (float) k3.number, time1, time2, time3, amount);
-		c.depth = Math.max(0f, CatmullRom.value(k0.depth, k1.depth, k2.depth, k3.depth, time1, time2, time3, amount));
+		c.size = Math.max(0.01f, (float) SmoothJoins.steady(k0.size, k1.size, k2.size, k3.size, time1, time2, time3, amount));
+		c.reveal = clamp01((float) SmoothJoins.steady(k0.reveal, k1.reveal, k2.reveal, k3.reveal, time1, time2, time3, amount));
+		c.number = SmoothJoins.steady(k0.number, k1.number, k2.number, k3.number, time1, time2, time3, amount);
+		c.depth = Math.max(0f, (float) SmoothJoins.steady(k0.depth, k1.depth, k2.depth, k3.depth, time1, time2, time3, amount));
 		for (int i = 0; i < 3; i++) {
-			c.sideColor[i] = clamp01(CatmullRom.value(k0.sideColor[i], k1.sideColor[i], k2.sideColor[i], k3.sideColor[i], time1, time2, time3, amount));
+			c.sideColor[i] = clamp01((float) SmoothJoins.steady(k0.sideColor[i], k1.sideColor[i], k2.sideColor[i], k3.sideColor[i], time1, time2, time3, amount));
 		}
 		for (int i = 0; i < 4; i++) {
-			c.color[i] = clamp01(CatmullRom.value(k0.color[i], k1.color[i], k2.color[i], k3.color[i], time1, time2, time3, amount));
-			c.backgroundColor[i] = clamp01(CatmullRom.value(k0.backgroundColor[i], k1.backgroundColor[i],
+			c.color[i] = clamp01((float) SmoothJoins.steady(k0.color[i], k1.color[i], k2.color[i], k3.color[i], time1, time2, time3, amount));
+			c.backgroundColor[i] = clamp01((float) SmoothJoins.steady(k0.backgroundColor[i], k1.backgroundColor[i],
 					k2.backgroundColor[i], k3.backgroundColor[i], time1, time2, time3, amount));
 		}
 		return c;

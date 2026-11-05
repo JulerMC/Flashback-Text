@@ -159,22 +159,37 @@ public final class WorldTextRenderer {
 		int textColor = argb(item.color, alpha);
 		int boxColor = item.background ? argb(item.backgroundColor, item.backgroundColor[3] * alpha) : 0;
 
-		// 3D text: thickness in text units, built from thin copies stacked behind the front
+		// 3D text: thickness in text units, built from thin copies stacked behind the face.
+		// Minecraft only draws text from the front, so the back gets its own face and sides.
 		float depthUnits = Math.max(0f, item.depth) / scale;
+		drawSolid(font, lines, matrix, consumers, layer, textColor, boxColor, light, item, alpha, depthUnits);
+		if (item.bothSides) {
+			Matrix4f back = new Matrix4f(matrix).translate(0, 0, -depthUnits).rotateY((float) Math.PI);
+			drawSolid(font, lines, back, consumers, layer, textColor, boxColor, light, item, alpha, depthUnits);
+		}
+	}
+
+	/**
+	 * The text's face, with its 3D thickness (if any) behind it. The face goes
+	 * first, then the layers front to back: each spot is then covered once (the
+	 * nearest layer hides the ones behind it), so see-through text fades evenly
+	 * instead of the stacked layers adding up to solid.
+	 */
+	private static void drawSolid(TextRenderer font, String[] lines, Matrix4f matrix, VertexConsumerProvider consumers,
+								  TextRenderer.TextLayerType layer, int textColor, int boxColor, int light, TextChange item,
+								  float alpha, float depthUnits) {
+		if (depthUnits > 0.01f) {
+			consumers = new UnsortedText(consumers);
+		}
+		drawLines(font, lines, matrix, consumers, layer, textColor, boxColor, light, item, depthUnits);
 		if (depthUnits > 0.01f) {
 			int baseRgb = argb(item.color, 1f) & 0xFFFFFF;
 			int sideColor = item.sideAuto ? argb(item.color, alpha) : argb(item.sideColor, alpha);
 			int layers = Math.min(96, Math.max(2, (int) Math.ceil(depthUnits / 0.35f)));
-			for (int i = layers; i >= 1; i--) {
+			for (int i = 1; i <= layers; i++) {
 				Matrix4f slice = new Matrix4f(matrix).translate(0, 0, -depthUnits * i / layers);
 				drawSlice(font, lines, slice, consumers, layer, sideColor, light, item, item.sideAuto ? baseRgb : -1);
 			}
-		}
-		drawLines(font, lines, matrix, consumers, layer, textColor, boxColor, light, item, depthUnits);
-		if (item.bothSides) {
-			// The same text turned around (on the back of any 3D thickness), so it reads correctly from behind too
-			Matrix4f back = new Matrix4f(matrix).translate(0, 0, -depthUnits).rotateY((float) Math.PI);
-			drawLines(font, lines, back, consumers, layer, textColor, boxColor, light, item, 0f);
 		}
 	}
 

@@ -35,6 +35,40 @@ public final class SmoothJoins {
 		return (float) hermite(p1, p2, m1, m2, h, amount);
 	}
 
+	/**
+	 * Like {@link #value} but never goes past the keyframes' values (no
+	 * overshoot): a keyframe between a rise and a fall, or next to an equal
+	 * keyframe, is a resting point. Used for counters, opacity, typing and size.
+	 */
+	public static double steady(double p0, double p1, double p2, double p3, float time1, float time2, float time3, float amount) {
+		double h = time2 - time1;
+		if (h <= 0) {
+			return p1;
+		}
+		double d1 = (p2 - p1) / h;
+		double m1 = steadySlope(p0, p1, time1, d1);
+		double m2 = steadySlope(p3, p2, time3 - time2, d1, true);
+		return hermite(p1, p2, m1, m2, h, amount);
+	}
+
+	private static double steadySlope(double p0, double p1, double left, double d1) {
+		if (left <= 1e-6) return 0;
+		return limit((p1 - p0) / left, d1);
+	}
+
+	private static double steadySlope(double p3, double p2, double right, double d1, boolean after) {
+		if (right <= 1e-6) return 0;
+		return limit(d1, (p3 - p2) / right);
+	}
+
+	/** Fritsch–Carlson: average of the two neighbouring slopes, zero at a peak/flat, capped so it can't overshoot. */
+	private static double limit(double a, double b) {
+		if (a * b <= 0) return 0;
+		double m = (a + b) / 2;
+		double cap = 3 * Math.min(Math.abs(a), Math.abs(b));
+		return Math.signum(m) * Math.min(Math.abs(m), cap);
+	}
+
 	public static float degrees(float p0, float p1, float p2, float p3, float time1, float time2, float time3, float amount) {
 		// Take the short way round between neighbouring keyframes, as Flashback does
 		float q0 = wrap(p0);

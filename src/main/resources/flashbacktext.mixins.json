@@ -15,7 +15,9 @@
 		"ReplayUIGuideMixin",
 		"CatmullRomMixin",
 		"TimelineWindowAccessor",
-		"KeyframePopupMixin"
+		"KeyframePopupMixin",
+		"MultiPhaseAccessor",
+		"RenderPhaseAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
