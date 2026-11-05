@@ -76,7 +76,7 @@ Grab [`flashback-text-1.3.2.jar`](download/flashback-text-1.3.2.jar) and put it 
 
 ## Updates
 
-- **1.4.0-alpha.1** (alpha, for testing): Redesigned Text settings with folding sections (Transform, Look, Animation, Counter, 3D text), formatting buttons, and delete/type in the header. New **Counter** (`{n}` counts between keyframes) and **3D text** (depth with darker sides). Download: [`flashback-text-1.4.0-alpha.1.jar`](download/flashback-text-1.4.0-alpha.1.jar)
+- **1.4.0-alpha.1** (alpha, for testing): Redesigned Text settings with folding sections (Transform, Look, Animation, Counter, 3D text), formatting buttons, and delete/type in the header. New **Counter** (`{n}` counts between keyframes) and **3D text** (depth with darker sides). Download: [`flashback-text-1.4.0-alpha.1.jar`](download/alpha/flashback-text-1.4.0-alpha.1.jar)
 - **1.3.2**: Fixed the background box hiding the text when a shader pack is on (tested with Solas).
 - **1.3.1**: Fixed the camera and Text jerking when they reach a keyframe (**Smooth keyframe joins**, in Visuals → Other). Added favourite fonts: click the ☆ to keep a font at the top of the list.
 - **1.3.0**: Fixed Text wobbling against the camera during camera moves. Added system fonts and the **Guide** drop-down (Rule of Thirds, Golden Spiral, Golden Section, Golden Triangles, Harmonious Triangles, Spiral Section).
