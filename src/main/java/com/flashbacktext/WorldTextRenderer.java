@@ -56,8 +56,9 @@ public final class WorldTextRenderer {
 				consumers = own;
 			}
 			Vec3d cam = context.camera().getPos();
+			org.joml.Quaternionf cameraRotation = context.camera().getRotation();
 			for (TextChange text : showing) {
-				draw(client, cam, consumers, text);
+				draw(client, cam, cameraRotation, consumers, text);
 			}
 			if (own != null) {
 				own.draw();
@@ -123,7 +124,7 @@ public final class WorldTextRenderer {
 		text.letters = shown.letters();
 	}
 
-	private static void draw(MinecraftClient client, Vec3d cam, VertexConsumerProvider consumers, TextChange item) {
+	private static void draw(MinecraftClient client, Vec3d cam, org.joml.Quaternionf cameraRotation, VertexConsumerProvider consumers, TextChange item) {
 		TextRenderer custom = SystemFonts.renderer(item.font, item.fontName);
 		TextRenderer font = custom != null ? custom : client.textRenderer;
 		float alpha = item.color[3];
@@ -133,15 +134,22 @@ public final class WorldTextRenderer {
 		String full = AMPERSAND_CODES.matcher(item.text == null ? "" : item.text).replaceAll("§");
 		int letters = item.letters >= 0 ? item.letters : Math.round(item.reveal * visibleLength(full));
 		String shown = typewriterCut(full, letters);
+		if (full.contains(Counter.TOKEN) || shown.endsWith("{") || shown.endsWith("{n")) {
+			shown = Counter.apply(shown, Counter.format(item.number, item.numberStyle, item.decimals));
+		}
 		String[] lines = shown.split("\n", -1);
 
 		// The world's view rotation is already applied by Minecraft while the
 		// world renders, so only move to the text and turn it (no camera rotation here)
 		float scale = Math.max(0.001f, item.size) / font.fontHeight;
 		Matrix4f matrix = new Matrix4f()
-				.translate((float) (item.x - cam.x), (float) (item.y - cam.y), (float) (item.z - cam.z))
-				.rotateYXZ((float) Math.PI - item.yaw * DEG, -item.pitch * DEG, item.roll * DEG)
-				.scale(scale, -scale, scale);
+				.translate((float) (item.x - cam.x), (float) (item.y - cam.y), (float) (item.z - cam.z));
+		if (item.faceCamera) {
+			matrix.rotate(cameraRotation).rotateZ(item.roll * DEG);
+		} else {
+			matrix.rotateYXZ((float) Math.PI - item.yaw * DEG, -item.pitch * DEG, item.roll * DEG);
+		}
+		matrix.scale(scale, -scale, scale);
 
 		int light = LightmapTextureManager.MAX_LIGHT_COORDINATE;
 		if (item.worldLight && client.world != null) {
@@ -151,16 +159,89 @@ public final class WorldTextRenderer {
 		int textColor = argb(item.color, alpha);
 		int boxColor = item.background ? argb(item.backgroundColor, item.backgroundColor[3] * alpha) : 0;
 
-		drawLines(font, lines, matrix, consumers, layer, textColor, boxColor, light, item);
+		// 3D text: thickness in text units, built from thin copies stacked behind the front
+		float depthUnits = Math.max(0f, item.depth) / scale;
+		if (depthUnits > 0.01f) {
+			int baseRgb = argb(item.color, 1f) & 0xFFFFFF;
+			int sideColor = item.sideAuto ? argb(item.color, alpha) : argb(item.sideColor, alpha);
+			int layers = Math.min(96, Math.max(2, (int) Math.ceil(depthUnits / 0.35f)));
+			for (int i = layers; i >= 1; i--) {
+				Matrix4f slice = new Matrix4f(matrix).translate(0, 0, -depthUnits * i / layers);
+				drawSlice(font, lines, slice, consumers, layer, sideColor, light, item, item.sideAuto ? baseRgb : -1);
+			}
+		}
+		drawLines(font, lines, matrix, consumers, layer, textColor, boxColor, light, item, depthUnits);
 		if (item.bothSides) {
-			// The same text turned around, so it reads correctly from behind too
-			Matrix4f back = new Matrix4f(matrix).rotateY((float) Math.PI);
-			drawLines(font, lines, back, consumers, layer, textColor, boxColor, light, item);
+			// The same text turned around (on the back of any 3D thickness), so it reads correctly from behind too
+			Matrix4f back = new Matrix4f(matrix).translate(0, 0, -depthUnits).rotateY((float) Math.PI);
+			drawLines(font, lines, back, consumers, layer, textColor, boxColor, light, item, 0f);
 		}
 	}
 
+	/**
+	 * One layer of 3D thickness: the letters only, no shadow. With automatic
+	 * sides (darkRgb >= 0) each letter keeps its own colour code, darkened;
+	 * otherwise every letter uses the chosen side colour.
+	 */
+	private static void drawSlice(TextRenderer font, String[] lines, Matrix4f matrix, VertexConsumerProvider consumers,
+								  TextRenderer.TextLayerType layer, int color, int light, TextChange item, int darkRgb) {
+		float blockHeight = lines.length * font.fontHeight;
+		int widest = 0;
+		for (String line : lines) {
+			widest = Math.max(widest, font.getWidth(line));
+		}
+		for (int i = 0; i < lines.length; i++) {
+			int width = font.getWidth(lines[i]);
+			float x = lineX(item.align, widest, width), y = -blockHeight / 2f + i * font.fontHeight;
+			if (darkRgb >= 0) {
+				font.draw(darkened(lines[i], darkRgb), x, y, color | 0xFFFFFF, false, matrix, consumers, layer, 0, light);
+			} else {
+				String plain = lines[i].replaceAll("§[0-9a-fA-F]", "");   // keep bold/italic, drop colours
+				font.draw(plain, x, y, color, false, matrix, consumers, layer, 0, light);
+			}
+		}
+	}
+
+	private static final float SIDE_SHADE = 0.55f;
+
+	/** The line as styled text with every colour darkened (base colour where there is no code). */
+	private static net.minecraft.text.Text darkened(String line, int baseRgb) {
+		net.minecraft.text.MutableText out = net.minecraft.text.Text.empty();
+		net.minecraft.text.Style style = net.minecraft.text.Style.EMPTY.withColor(shade(baseRgb));
+		StringBuilder run = new StringBuilder();
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (c == '§' && i + 1 < line.length()) {
+				if (!run.isEmpty()) {
+					out.append(net.minecraft.text.Text.literal(run.toString()).setStyle(style));
+					run.setLength(0);
+				}
+				net.minecraft.util.Formatting f = net.minecraft.util.Formatting.byCode(line.charAt(++i));
+				if (f == null) continue;
+				if (f == net.minecraft.util.Formatting.RESET) {
+					style = net.minecraft.text.Style.EMPTY.withColor(shade(baseRgb));
+				} else if (f.isColor() && f.getColorValue() != null) {
+					style = net.minecraft.text.Style.EMPTY.withColor(shade(f.getColorValue()));   // colours reset formats, as in Minecraft
+				} else {
+					style = style.withFormatting(f);
+				}
+				continue;
+			}
+			run.append(c);
+		}
+		if (!run.isEmpty()) {
+			out.append(net.minecraft.text.Text.literal(run.toString()).setStyle(style));
+		}
+		return out;
+	}
+
+	private static int shade(int rgb) {
+		int r = Math.round(((rgb >> 16) & 255) * SIDE_SHADE), g = Math.round(((rgb >> 8) & 255) * SIDE_SHADE), b = Math.round((rgb & 255) * SIDE_SHADE);
+		return (r << 16) | (g << 8) | b;
+	}
+
 	private static void drawLines(TextRenderer font, String[] lines, Matrix4f matrix, VertexConsumerProvider consumers,
-								  TextRenderer.TextLayerType layer, int textColor, int boxColor, int light, TextChange item) {
+								  TextRenderer.TextLayerType layer, int textColor, int boxColor, int light, TextChange item, float depthUnits) {
 		float blockHeight = lines.length * font.fontHeight;
 		int widest = 0;
 		for (String line : lines) {
@@ -177,7 +258,7 @@ public final class WorldTextRenderer {
 				int width = font.getWidth(lines[i]);
 				float x = lineX(item.align, widest, width);
 				float y = -blockHeight / 2f + i * font.fontHeight;
-				quad(box, matrix, x - 1, y - 1, x + width, y + font.fontHeight, boxColor, light);
+				quad(box, new Matrix4f(matrix).translate(0, 0, -depthUnits), x - 1, y - 1, x + width, y + font.fontHeight, boxColor, light);
 			}
 			float scale = Math.max(0.001f, item.size) / font.fontHeight;
 			float lift = 0.06f + 0.004f / scale;   // ~4 mm in front of the box, in text units
@@ -188,7 +269,7 @@ public final class WorldTextRenderer {
 			int width = font.getWidth(line);
 			float x = lineX(item.align, widest, width);
 			float y = -blockHeight / 2f + i * font.fontHeight;
-			font.draw(line, x, y, textColor, item.shadow, textMatrix, consumers, layer, 0, light);
+			font.draw(line, x, y, textColor, item.shadow && depthUnits <= 0.01f, textMatrix, consumers, layer, 0, light);
 		}
 	}
 

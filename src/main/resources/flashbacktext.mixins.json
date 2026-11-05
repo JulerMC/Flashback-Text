@@ -13,7 +13,9 @@
 		"ReplayVisualsMixin",
 		"VisualsWindowGuideMixin",
 		"ReplayUIGuideMixin",
-		"CatmullRomMixin"
+		"CatmullRomMixin",
+		"TimelineWindowAccessor",
+		"KeyframePopupMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

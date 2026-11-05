@@ -60,6 +60,18 @@ public class TextKeyframe extends Keyframe {
 	public boolean bothSides = true;
 	/** Typewriter: share of the characters shown, 0..1. */
 	public float reveal = 1f;
+	/** Turn to face the camera every frame, like a name tag. */
+	public boolean faceCamera = false;
+	/** Counter: the number shown where the text has {n}; counts between keyframes. */
+	public double number = 0;
+	/** 0 = 1,000  1 = 1000  2 = 1.0K  3 = 00:42 (number is seconds). */
+	public int numberStyle = 0;
+	public int decimals = 0;
+	/** 3D text: thickness in blocks (0 = flat). */
+	public float depth = 0f;
+	/** 3D text side colour; ignored while sideAuto is on (sides are a darker front colour). */
+	public float[] sideColor = {0.35f, 0.35f, 0.35f};
+	public boolean sideAuto = true;
 	/** System font ("path#face"), or empty for Minecraft's font. */
 	public String font = "";
 	/** The font's name, to find it again on another computer. */
@@ -98,6 +110,13 @@ public class TextKeyframe extends Keyframe {
 		c.reveal = reveal;
 		c.font = font;
 		c.fontName = fontName;
+		c.faceCamera = faceCamera;
+		c.number = number;
+		c.numberStyle = numberStyle;
+		c.decimals = decimals;
+		c.depth = depth;
+		c.sideColor = sideColor.clone();
+		c.sideAuto = sideAuto;
 		return c;
 	}
 
@@ -121,6 +140,11 @@ public class TextKeyframe extends Keyframe {
 		c.roll = CatmullRom.degrees(k0.roll, k1.roll, k2.roll, k3.roll, time1, time2, time3, amount);
 		c.size = Math.max(0.01f, CatmullRom.value(k0.size, k1.size, k2.size, k3.size, time1, time2, time3, amount));
 		c.reveal = clamp01(CatmullRom.value(k0.reveal, k1.reveal, k2.reveal, k3.reveal, time1, time2, time3, amount));
+		c.number = CatmullRom.value((float) k0.number, (float) k1.number, (float) k2.number, (float) k3.number, time1, time2, time3, amount);
+		c.depth = Math.max(0f, CatmullRom.value(k0.depth, k1.depth, k2.depth, k3.depth, time1, time2, time3, amount));
+		for (int i = 0; i < 3; i++) {
+			c.sideColor[i] = clamp01(CatmullRom.value(k0.sideColor[i], k1.sideColor[i], k2.sideColor[i], k3.sideColor[i], time1, time2, time3, amount));
+		}
 		for (int i = 0; i < 4; i++) {
 			c.color[i] = clamp01(CatmullRom.value(k0.color[i], k1.color[i], k2.color[i], k3.color[i], time1, time2, time3, amount));
 			c.backgroundColor[i] = clamp01(CatmullRom.value(k0.backgroundColor[i], k1.backgroundColor[i],
@@ -152,6 +176,12 @@ public class TextKeyframe extends Keyframe {
 		c.roll = (float) Hermite.degrees(values(keyframes, k -> (double) k.roll), tick);
 		c.size = Math.max(0.01f, (float) Hermite.value(values(keyframes, k -> (double) k.size), tick));
 		c.reveal = clamp01((float) Hermite.value(values(keyframes, k -> (double) k.reveal), tick));
+		c.number = Hermite.value(values(keyframes, k -> k.number), tick);
+		c.depth = Math.max(0f, (float) Hermite.value(values(keyframes, k -> (double) k.depth), tick));
+		for (int i = 0; i < 3; i++) {
+			int channel = i;
+			c.sideColor[i] = clamp01((float) Hermite.value(values(keyframes, k -> (double) k.sideColor[channel]), tick));
+		}
 		for (int i = 0; i < 4; i++) {
 			int channel = i;
 			c.color[i] = clamp01((float) Hermite.value(values(keyframes, k -> (double) k.color[channel]), tick));
@@ -174,125 +204,14 @@ public class TextKeyframe extends Keyframe {
 
 	@Override
 	public void renderEditKeyframe(Consumer<Consumer<Keyframe>> update) {
-		if (editing != this || editBuffer == null) {
-			editing = this;
-			editBuffer = new ImString(this.text == null ? "" : this.text, TEXT_CAPACITY);
-		}
-		ImGui.text("Text");
-		if (ImGui.inputTextMultiline("##flashbacktext", editBuffer, 260, 60)) {
-			String value = editBuffer.get();
-			update.accept(k -> ((TextKeyframe) k).text = value);
-		}
-		ImGui.textDisabled("New lines work. &c red, &e yellow, &a green, &l bold, &o italic, &r reset");
-		fontPicker(update);
-
-		ImGui.separator();
-		ImGui.setNextItemWidth(260);
-		float[] pos = {(float) this.x, (float) this.y, (float) this.z};
-		if (ImGui.dragFloat3("Position", pos, 0.05f, -30000000f, 30000000f, "%.2f")) {
-			update.accept(k -> {
-				TextKeyframe t = (TextKeyframe) k;
-				t.x = pos[0];
-				t.y = pos[1];
-				t.z = pos[2];
-			});
-		}
-		if (ImGui.button("Place in front of camera")) {
-			update.accept(k -> TextKeyframeType.placeInFrontOfCamera((TextKeyframe) k));
-		}
-		ImGui.sameLine();
-		if (ImGui.button("Move to camera")) {
-			Vec3d cam = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
-			update.accept(k -> {
-				TextKeyframe t = (TextKeyframe) k;
-				t.x = cam.x;
-				t.y = cam.y;
-				t.z = cam.z;
-			});
-		}
-		ImGui.setNextItemWidth(160);
-		float[] yawInput = {this.yaw};
-		if (ImGui.dragFloat("Yaw", yawInput, 0.5f, -360f, 360f, "%.1f")) {
-			update.accept(k -> ((TextKeyframe) k).yaw = yawInput[0]);
-		}
-		ImGui.setNextItemWidth(160);
-		float[] pitchInput = {this.pitch};
-		if (ImGui.dragFloat("Pitch", pitchInput, 0.5f, -90f, 90f, "%.1f")) {
-			update.accept(k -> ((TextKeyframe) k).pitch = pitchInput[0]);
-		}
-		ImGui.setNextItemWidth(160);
-		float[] rollInput = {this.roll};
-		if (ImGui.dragFloat("Roll", rollInput, 0.5f, -360f, 360f, "%.1f")) {
-			update.accept(k -> ((TextKeyframe) k).roll = rollInput[0]);
-		}
-		if (ImGui.button("Face camera")) {
-			update.accept(k -> TextKeyframeType.faceCamera((TextKeyframe) k));
-		}
-
-		ImGui.separator();
-		ImGui.setNextItemWidth(160);
-		float[] sizeInput = {this.size};
-		if (ImGui.dragFloat("Size (blocks)", sizeInput, 0.01f, 0.02f, 64f, "%.2f")) {
-			float value = Math.max(0.02f, sizeInput[0]);
-			update.accept(k -> ((TextKeyframe) k).size = value);
-		}
-		ImGui.setNextItemWidth(160);
-		ImInt alignInput = new ImInt(this.align);
-		if (ImGui.combo("Align", alignInput, ALIGNMENTS)) {
-			int value = alignInput.get();
-			update.accept(k -> ((TextKeyframe) k).align = value);
-		}
-		float[] colorInput = this.color.clone();
-		ImGui.setNextItemWidth(260);
-		if (ImGui.colorEdit4("Colour", colorInput)) {
-			update.accept(k -> ((TextKeyframe) k).color = colorInput.clone());
-		}
-		ImGui.textDisabled("Lower the colour's alpha on a keyframe to fade the text.");
-		ImGui.textDisabled("Typewriter: how much of this keyframe's text is showing. Between keyframes");
-		ImGui.textDisabled("it types at an even speed. Different text on the next keyframe is untyped,");
-		ImGui.textDisabled("then the new text is typed in. Shared words at the start stay.");
-		ImGui.setNextItemWidth(160);
-		float[] revealInput = {this.reveal * 100f};
-		if (ImGui.sliderFloat("Typewriter %", revealInput, 0f, 100f, "%.0f%%")) {
-			float value = clamp01(revealInput[0] / 100f);
-			update.accept(k -> ((TextKeyframe) k).reveal = value);
-		}
-		if (ImGui.checkbox("Shadow", this.shadow)) {
-			boolean value = !this.shadow;
-			update.accept(k -> ((TextKeyframe) k).shadow = value);
-		}
-		ImGui.sameLine();
-		if (ImGui.checkbox("Background box", this.background)) {
-			boolean value = !this.background;
-			update.accept(k -> ((TextKeyframe) k).background = value);
-		}
-		if (this.background) {
-			float[] boxInput = this.backgroundColor.clone();
-			ImGui.setNextItemWidth(260);
-			if (ImGui.colorEdit4("Box colour", boxInput)) {
-				update.accept(k -> ((TextKeyframe) k).backgroundColor = boxInput.clone());
-			}
-		}
-		if (ImGui.checkbox("Readable from behind", this.bothSides)) {
-			boolean value = !this.bothSides;
-			update.accept(k -> ((TextKeyframe) k).bothSides = value);
-		}
-		if (ImGui.checkbox("Show through blocks", this.throughBlocks)) {
-			boolean value = !this.throughBlocks;
-			update.accept(k -> ((TextKeyframe) k).throughBlocks = value);
-		}
-		ImGui.sameLine();
-		if (ImGui.checkbox("World lighting", this.worldLight)) {
-			boolean value = !this.worldLight;
-			update.accept(k -> ((TextKeyframe) k).worldLight = value);
-		}
-		ImGui.separator();
+		TextEditor.draw(this, update);
 	}
 
-	private void fontPicker(Consumer<Consumer<Keyframe>> update) {
+	/** The font drop-down: search box, starred fonts first. */
+	void fontPickerWidget(Consumer<Consumer<Keyframe>> update, float width) {
 		String current = this.font == null || this.font.isEmpty() ? "Minecraft (default)" : SystemFonts.nameOf(this.font, this.fontName);
-		ImGui.setNextItemWidth(260);
-		if (ImGui.beginCombo("Font##flashbacktextFont", current)) {
+		ImGui.setNextItemWidth(width);
+		if (ImGui.beginCombo("##flashbacktextFont", current)) {
 			if (ImGui.isWindowAppearing()) {
 				fontSearch.set("");
 				ImGui.setKeyboardFocusHere();
@@ -412,6 +331,13 @@ public class TextKeyframe extends Keyframe {
 		o.addProperty("world_light", worldLight);
 		o.addProperty("both_sides", bothSides);
 		o.addProperty("reveal", reveal);
+		o.addProperty("face_camera", faceCamera);
+		o.addProperty("number", number);
+		o.addProperty("number_style", numberStyle);
+		o.addProperty("decimals", decimals);
+		o.addProperty("depth", depth);
+		o.add("side_color", array(sideColor));
+		o.addProperty("side_auto", sideAuto);
 		o.addProperty("font", font == null ? "" : font);
 		o.addProperty("font_name", fontName == null ? "" : fontName);
 		return o;
@@ -441,6 +367,13 @@ public class TextKeyframe extends Keyframe {
 		if (o.has("worldLight")) k.worldLight = o.get("worldLight").getAsBoolean();
 		if (o.has("bothSides")) k.bothSides = o.get("bothSides").getAsBoolean();
 		if (o.has("reveal")) k.reveal = o.get("reveal").getAsFloat();
+		if (o.has("face_camera")) k.faceCamera = o.get("face_camera").getAsBoolean();
+		if (o.has("number")) k.number = o.get("number").getAsDouble();
+		if (o.has("number_style")) k.numberStyle = o.get("number_style").getAsInt();
+		if (o.has("decimals")) k.decimals = o.get("decimals").getAsInt();
+		if (o.has("depth")) k.depth = o.get("depth").getAsFloat();
+		if (o.has("side_color")) k.sideColor = floats(o.get("side_color"), k.sideColor);
+		if (o.has("side_auto")) k.sideAuto = o.get("side_auto").getAsBoolean();
 		if (o.has("font")) k.font = o.get("font").getAsString();
 		if (o.has("font_name")) k.fontName = o.get("font_name").getAsString();
 		if (o.has("fontName")) k.fontName = o.get("fontName").getAsString();

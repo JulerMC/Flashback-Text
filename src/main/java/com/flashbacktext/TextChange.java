@@ -22,6 +22,13 @@ public final class TextChange implements KeyframeChange {
 	public boolean worldLight;
 	public boolean bothSides;
 	public float reveal;
+	public boolean faceCamera;
+	public double number;
+	public int numberStyle;
+	public int decimals;
+	public float depth;
+	public float[] sideColor = {0.35f, 0.35f, 0.35f};
+	public boolean sideAuto = true;
 	public String font = "";
 	public String fontName = "";
 	/** Letters to show, worked out by {@link Typewriter} from the keyframes (-1 = use reveal). */
@@ -46,6 +53,13 @@ public final class TextChange implements KeyframeChange {
 		c.worldLight = k.worldLight;
 		c.bothSides = k.bothSides;
 		c.reveal = k.reveal;
+		c.faceCamera = k.faceCamera;
+		c.number = k.number;
+		c.numberStyle = k.numberStyle;
+		c.decimals = k.decimals;
+		c.depth = k.depth;
+		c.sideColor = k.sideColor.clone();
+		c.sideAuto = k.sideAuto;
 		c.font = k.font == null ? "" : k.font;
 		c.fontName = k.fontName == null ? "" : k.fontName;
 		return c;
@@ -70,6 +84,9 @@ public final class TextChange implements KeyframeChange {
 		c.color = lerp(this.color, o.color, t);
 		c.backgroundColor = lerp(this.backgroundColor, o.backgroundColor, t);
 		c.reveal = lerp(this.reveal, o.reveal, t);
+		c.number = this.number + (o.number - this.number) * amount;
+		c.depth = lerp(this.depth, o.depth, t);
+		c.sideColor = lerp(this.sideColor, o.sideColor, t);
 		return c;
 	}
 
@@ -85,6 +102,10 @@ public final class TextChange implements KeyframeChange {
 		c.bothSides = from.bothSides;
 		c.font = from.font;
 		c.fontName = from.fontName;
+		c.faceCamera = from.faceCamera;
+		c.numberStyle = from.numberStyle;
+		c.decimals = from.decimals;
+		c.sideAuto = from.sideAuto;
 		return c;
 	}
 

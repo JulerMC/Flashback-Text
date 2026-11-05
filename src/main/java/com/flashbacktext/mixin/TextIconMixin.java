@@ -16,5 +16,8 @@ public class TextIconMixin {
 			at = @At(value = "INVOKE", target = "Limgui/moulberry90/ImFontGlyphRangesBuilder;buildRanges()[S"))
 	private static void flashbacktext$addIcon(CallbackInfoReturnable<short[]> cir, ImFontGlyphRangesBuilder builder) {
 		builder.addChar(TextKeyframeType.ICON.charAt(0));
+		for (char icon : com.flashbacktext.TextEditor.ICONS) {
+			builder.addChar(icon);
+		}
 	}
 }
