@@ -300,6 +300,8 @@ public class TextKeyframe extends Keyframe {
 			ImGui.setNextItemWidth(250);
 			ImGui.inputTextWithHint("##flashbacktextFontSearch", "Search fonts", fontSearch);
 			String search = fontSearch.get().trim().toLowerCase(java.util.Locale.ROOT);
+			ImGui.dummy(ImGui.getTextLineHeight(), ImGui.getTextLineHeight());   // lines up with the star column
+			ImGui.sameLine();
 			if (ImGui.selectable("Minecraft (default)", this.font == null || this.font.isEmpty())) {
 				update.accept(k -> {
 					((TextKeyframe) k).font = "";
@@ -310,23 +312,81 @@ public class TextKeyframe extends Keyframe {
 			if (fonts.isEmpty()) {
 				ImGui.textDisabled(SystemFonts.searching() ? "Finding fonts on this computer..." : "No fonts found on this computer");
 			}
-			int shown = 0;
+			// Starred fonts first, then the rest, each in name order
+			java.util.List<SystemFonts.Entry> ordered = new java.util.ArrayList<>(fonts.size());
 			for (SystemFonts.Entry entry : fonts) {
+				if (FavouriteFonts.contains(entry.name())) ordered.add(entry);
+			}
+			int favourites = ordered.size();
+			for (SystemFonts.Entry entry : fonts) {
+				if (!FavouriteFonts.contains(entry.name())) ordered.add(entry);
+			}
+			int shown = 0;
+			for (int i = 0; i < ordered.size(); i++) {
+				SystemFonts.Entry entry = ordered.get(i);
 				if (!search.isEmpty() && !entry.name().toLowerCase(java.util.Locale.ROOT).contains(search)) {
 					continue;
+				}
+				if (i == favourites && favourites > 0 && shown > 0) {
+					ImGui.separator();
 				}
 				if (++shown > 400) {
 					ImGui.textDisabled("Type to search for more...");
 					break;
 				}
-				if (ImGui.selectable(entry.name() + "##" + entry.key(), entry.key().equals(this.font))) {
-					update.accept(k -> {
-						((TextKeyframe) k).font = entry.key();
-						((TextKeyframe) k).fontName = entry.name();
-					});
-				}
+				fontRow(entry, update);
 			}
 			ImGui.endCombo();
+		}
+	}
+
+	private static final int STAR_YELLOW = 0xFF00D7FF;   // ImGui colours are ABGR: this is #FFD700
+	private static final int STAR_OUTLINE = 0xFFC8C8C8;
+
+	/** One font in the list: a star to favourite it, then the name to pick it. */
+	private void fontRow(SystemFonts.Entry entry, Consumer<Consumer<Keyframe>> update) {
+		boolean favourite = FavouriteFonts.contains(entry.name());
+		float size = ImGui.getTextLineHeight();
+		float x = ImGui.getCursorScreenPosX(), y = ImGui.getCursorScreenPosY();
+		boolean rowHovered = ImGui.isMouseHoveringRect(x, y, x + ImGui.getContentRegionAvailX(), y + size);
+		if (ImGui.invisibleButton("##star" + entry.key(), size, size)) {
+			FavouriteFonts.toggle(entry.name());
+			favourite = !favourite;
+		}
+		boolean starHovered = ImGui.isItemHovered();
+		if (starHovered) {
+			ImGui.setTooltip(favourite ? "Remove from favourites" : "Add to favourites (always shown at the top)");
+		}
+		if (favourite) {
+			drawStar(x + size / 2, y + size / 2, size * 0.48f, STAR_YELLOW, true);
+		} else if (rowHovered) {
+			drawStar(x + size / 2, y + size / 2, size * 0.48f, starHovered ? STAR_YELLOW : STAR_OUTLINE, false);
+		}
+		ImGui.sameLine();
+		if (ImGui.selectable(entry.name() + "##" + entry.key(), entry.key().equals(this.font))) {
+			update.accept(k -> {
+				((TextKeyframe) k).font = entry.key();
+				((TextKeyframe) k).fontName = entry.name();
+			});
+		}
+	}
+
+	private static void drawStar(float cx, float cy, float radius, int colour, boolean filled) {
+		imgui.moulberry90.ImDrawList list = ImGui.getWindowDrawList();
+		float[] px = new float[10], py = new float[10];
+		for (int i = 0; i < 10; i++) {
+			double angle = -Math.PI / 2 + i * Math.PI / 5;
+			float r = i % 2 == 0 ? radius : radius * 0.45f;
+			px[i] = cx + (float) (Math.cos(angle) * r);
+			py[i] = cy + (float) (Math.sin(angle) * r);
+		}
+		for (int i = 0; i < 10; i++) {
+			int j = (i + 1) % 10;
+			if (filled) {
+				list.addTriangleFilled(cx, cy, px[i], py[i], px[j], py[j], colour);
+			} else {
+				list.addLine(px[i], py[i], px[j], py[j], colour, 1.5f);
+			}
 		}
 	}
 

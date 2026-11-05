@@ -12,7 +12,8 @@
 		"EditorStateTimeMixin",
 		"ReplayVisualsMixin",
 		"VisualsWindowGuideMixin",
-		"ReplayUIGuideMixin"
+		"ReplayUIGuideMixin",
+		"CatmullRomMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

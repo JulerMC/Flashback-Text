@@ -9,4 +9,8 @@ public interface GuideSettings {
 	int flashbacktext$guideFlip();
 
 	void flashbacktext$setGuideFlip(int flip);
+
+	boolean flashbacktext$smoothJoins();
+
+	void flashbacktext$setSmoothJoins(boolean on);
 }

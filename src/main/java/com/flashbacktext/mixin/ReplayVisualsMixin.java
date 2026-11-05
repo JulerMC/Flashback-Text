@@ -12,6 +12,19 @@ public class ReplayVisualsMixin implements GuideSettings {
 	private String flashbacktextGuide = "";
 	@Unique
 	private int flashbacktextGuideFlip = 0;
+	/** Stored as "turned off" so replays saved before this setting existed count as on. */
+	@Unique
+	private boolean flashbacktextSmoothJoinsOff = false;
+
+	@Override
+	public boolean flashbacktext$smoothJoins() {
+		return !flashbacktextSmoothJoinsOff;
+	}
+
+	@Override
+	public void flashbacktext$setSmoothJoins(boolean on) {
+		flashbacktextSmoothJoinsOff = !on;
+	}
 
 	@Override
 	public String flashbacktext$guide() {

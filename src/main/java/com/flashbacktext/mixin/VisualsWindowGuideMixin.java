@@ -49,6 +49,13 @@ public class VisualsWindowGuideMixin {
 				state.markDirty();
 			}
 		}
+		if (ImGui.checkbox("Smooth keyframe joins##flashbacktextSmooth", settings.flashbacktext$smoothJoins())) {
+			settings.flashbacktext$setSmoothJoins(!settings.flashbacktext$smoothJoins());
+			state.markDirty();
+		}
+		if (ImGui.isItemHovered()) {
+			ImGui.setTooltip("Keeps motion at the same speed through each Smooth keyframe,\nso the camera and Text don't jerk when they reach a keyframe.\nTurn off for Flashback's original Smooth curve.");
+		}
 		return false;   // Flashback's own checkbox code does nothing this frame
 	}
 }
