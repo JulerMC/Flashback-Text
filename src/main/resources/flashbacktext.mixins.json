@@ -17,7 +17,18 @@
 		"TimelineWindowAccessor",
 		"KeyframePopupMixin",
 		"MultiPhaseAccessor",
-		"RenderPhaseAccessor"
+		"RenderPhaseAccessor",
+		"PovRecorderMixin",
+		"PovReplayUIMixin",
+		"PovSelectedEntityPopupMixin",
+		"PovGameRendererMixin",
+		"PovHandledScreenAccessor",
+		"PovHandledScreensInvoker",
+		"PovScreenHandlerAccessor",
+		"PovChatScreenAccessor",
+		"PovInventoryScreenMixin",
+		"PovHandledScreenMixin",
+		"PovMinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

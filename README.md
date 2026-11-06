@@ -12,6 +12,7 @@
   <a href="https://discord.gg/BXv7Mx4vny"><img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the Discord"></a>
   <a href="https://buymeacoffee.com/juler"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
   <a href="download/flashback-text-1.4.0.jar"><img src="https://img.shields.io/badge/Download-1.4.0-2ea44f?style=for-the-badge" alt="Download 1.4.0"></a>
+  <a href="download/alpha/flashback-text-1.5.0-alpha.1.jar"><img src="https://img.shields.io/badge/Alpha-1.5.0--alpha.1-A371F7?style=for-the-badge" alt="Download 1.5.0-alpha.1"></a>
 </p>
 
 <p align="center">
@@ -47,8 +48,44 @@
 3. Add a second keyframe where it should disappear.
 4. **Right click a keyframe** to edit the text, how it looks and much more.
 
+## 1.5.0 Alpha: POV Recording + Fake Items
+
+The alpha adds a whole new part to the mod. While Flashback records, it also saves your POV, and when you **spectate yourself** in the replay it plays back like a live recording of your screen. You can also give any player fake items. Download it [here](download/alpha/flashback-text-1.5.0-alpha.1.jar), it has everything from 1.4.0 aswell. Its an alpha so expect bugs, and report them in the discord!
+
+![Chest opened in a replay with the recorded cursor and tooltip](images/alpha/pov-chest.png)
+
+**What gets recorded**
+- **Your whole inventory**: every slot, armour, offhand, the slot you're holding, XP and hunger. Flashback normally only keeps the hotbar, and only if "Record hotbar" is on.
+- **Every screen you open**: chests, barrels, shulker boxes, furnaces, crafting tables, anvils, enchanting tables, brewing stands, villager trades, your inventory and more, with whats in every slot, the item on your cursor and the progress arrows.
+- **Your mouse** every frame so it's smooth, and your **clicks** (shown as rings).
+- **Chat typing**: what you type in chat shows at the bottom.
+
+The screens are real Minecraft screens rebuilt from the recording, so hover highlights, tooltips, the item on your cursor and the player model looking at your mouse all work. Your hotbar shows your real items, and everything shows up in your **exported videos** too. Replays recorded with it still open fine without the mod.
+
+![Chat typing playback](images/alpha/pov-chat.png)
+
+![Frames from an exported video](images/alpha/pov-export.png)
+
+**Fake items** -> click the blue tab on the right edge of the editor, or right click a player -> **Inventory & POV**.
+- Pick any player and any slot, search for an item, then set the **count** (1-99), a **custom name** (with `&` colour codes), **enchanted glint**, **enchantments** and **durability**.
+- **Drag** items between slots. **Right click** a slot to make it empty, go back to the real item, copy/paste, or hold that slot.
+- Fake items show on the **hotbar**, in the **replayed screens**, in their **hand** and on their **armour**.
+- **Held slot**, **Hide real items**, **Show from / to** (fake items only between two moments), **Copy real** and **Presets** you can load into any player.
+- POV settings: opened screens, hotbar, chat typing, **Always show their inventory**, cursor style (Arrow, Pixel, Dot, Off) and size, click rings, smooth cursor, background dim and screen size. You can also turn off each part of the recording.
+
+![Inventory & POV panel with a fake enchanted sword](images/alpha/fake-items-panel.png)
+
+![The player holding the fake sword](images/alpha/fake-held-in-world.png)
+
+**Alpha limits**
+- Screens, the mouse and the full inventory only get recorded for the player who records. The server doesn't send other players inventories, only their held items and armour, but you can fill in the rest with fake items.
+- The creative menu shows as the normal inventory without the cursor.
+- Horse inventories and screens from some mods show as a plain chest with the right items.
+- Typing in signs, books and anvil names isn't shown yet.
+
 ## Updates
 
+- **1.5.0-alpha.1 ALPHA**: POV recording and playback (inventory, opened screens, mouse, clicks, chat typing) and the **Inventory & POV** panel for fake items. Fixed the "Set 0%" hint under Animation showing as "Set 00n".
 - **1.4.0 CURRENT**: New settings UI with folding sections, formatting buttons and delete/type in the header. Added the **Counter** and **3D text**. Fixed 3D text going flat from behind, 3D text not fading, and counters going past the number you set.
 - **1.3.2**: Fixed the background box hiding the text when a shader pack is on.
 - **1.3.1**: Fixed the camera and text jerking when they reach a keyframe. Added favorite fonts button.
@@ -84,6 +121,8 @@
 ## Download
 
 Grab [`flashback-text-1.4.0.jar`](download/flashback-text-1.4.0.jar) and put it in your `mods` folder next to Flashback.
+
+Want to try POV recording and fake items? Grab the alpha [`flashback-text-1.5.0-alpha.1.jar`](download/alpha/flashback-text-1.5.0-alpha.1.jar) instead (only use one of them).
 
 ## Good to know
 

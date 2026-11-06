@@ -1,5 +1,6 @@
 package com.flashbacktext;
 
+import com.flashbacktext.pov.PovSetup;
 import com.moulberry.flashback.keyframe.KeyframeRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -16,6 +17,7 @@ public class FlashbackText implements ClientModInitializer {
 		// After every mod has started, so Text is listed after Flashback's own elements
 		ClientLifecycleEvents.CLIENT_STARTED.register(client -> registerTextElement());
 		WorldRenderEvents.AFTER_ENTITIES.register(WorldTextRenderer::render);
+		PovSetup.init();
 	}
 
 	/** Adds Text to Flashback's elements. Safe to call more than once. */

@@ -3,7 +3,7 @@
 	"id": "flashbacktext",
 	"version": "${version}",
 	"name": "Flashback Text",
-	"description": "Adds a Text element to Flashback's timeline: text placed in the world of your replay, animated with keyframes, shown in the editor and in exported videos.",
+	"description": "Adds a Text element to Flashback's timeline (text placed in the world of your replay, animated with keyframes) and records your POV: inventory, opened chests and screens, mouse and chat typing, played back when you spectate. Also fake items for any player.",
 	"authors": [
 		"Ceohh"
 	],

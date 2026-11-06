@@ -246,7 +246,7 @@ public final class TextEditor {
 	private static void label(String text) {
 		ImGui.alignTextToFramePadding();
 		ImGui.pushStyleColor(ImGuiCol.Text, MUTED);
-		ImGui.text(text);
+		ImGui.textUnformatted(text);
 		ImGui.popStyleColor();
 		ImGui.sameLine(LABEL);
 	}
@@ -254,7 +254,7 @@ public final class TextEditor {
 	private static void hint(String text) {
 		ImGui.setCursorPosX(LABEL);
 		ImGui.pushStyleColor(ImGuiCol.Text, FAINT);
-		ImGui.text(text);
+		ImGui.textUnformatted(text);
 		ImGui.popStyleColor();
 	}
 
